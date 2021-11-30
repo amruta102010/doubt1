@@ -1,50 +1,17 @@
-const express = require('express');
-const { randomBytes } = require('crypto');
-const bodyParser = require('body-parser');
-const { json } = require('express');
-const cors = require('cors')
-const axios = require('axios')
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
 
-const app = express();
-app.use(bodyParser.json());
-app.use(cors())
 
-const commentsByPostId= {};
+ReactDOM.render(
+  
+    <App />,
+  
+  document.getElementById('root')
+);
 
-app.get('/posts/:id/comments', (req, res) => {
-   console.log(req.params.id);
-   console.log(commentsByPostId);
-   console.log(commentsByPostId[req.params.id] );
-   res.send(commentsByPostId[req.params.id] || [])
-});
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 
-app.post('/posts/:id/comments', async (req, res) => {
-   const commentId = randomBytes(4).toString('hex');
-   const { content } = req.body;
-
-   const comments = commentsByPostId[req.params.id] || []
-   comments.push({id : commentId, content });
-   commentsByPostId[req.params.id] = comments;
-   console.log(comments)
-
-  await axios.post('http://localhost:4005/events', {
-      type: 'CommentCreated',
-      data: {
-         id: commentId,
-         content,
-         postId: req.params.id
-      }
-   })
-
-   res.status(201).send(comments)
-});
-
-app.post('/events', (req, res) => {
-   console.log('Event Received', req.body.type);
-
-   res.send({})
-});
-
-app.listen(4001, () =>{
-    console.log('Listening on 4001');
-})
